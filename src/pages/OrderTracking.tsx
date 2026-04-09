@@ -46,6 +46,14 @@ export default function OrderTracking() {
     setIsModalOpen(true);
   };
 
+  const handleStatusChange = async (order: FlightOrder, newStatus: string) => {
+    await saveFlight({
+      ...order,
+      status: newStatus as any
+    });
+    loadData();
+  };
+
   const statuses = ['Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Confirmed', 'Completed'];
 
   return (
@@ -73,7 +81,16 @@ export default function OrderTracking() {
                     {new Date(order.date).toLocaleDateString()} • {order.items.length} items
                   </p>
                 </div>
-                <div className="flex gap-2 w-full sm:w-auto">
+                <div className="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+                  <select 
+                    value={order.status} 
+                    onChange={(e) => handleStatusChange(order, e.target.value)}
+                    className="flex-1 sm:flex-none px-3 py-1.5 text-xs sm:text-sm border border-slate-300 rounded-md bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  >
+                    {statuses.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
                   <button onClick={() => openUploadModal(order)} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:text-sm border border-slate-300 rounded-md hover:bg-slate-50 text-slate-700">
                     <Upload className="w-4 h-4" /> Upload Bill
                   </button>
