@@ -1,0 +1,126 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the JetGalley application.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "crew", "approver"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "role", "createdAt"]
+    },
+    "CatalogItem": {
+      "title": "CatalogItem",
+      "description": "Master catalog of food and grocery items.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["food", "grocery"] },
+        "category": { "type": "string" },
+        "unit": { "type": "string" },
+        "dietaryTags": { "type": "array", "items": { "type": "string" } },
+        "allergens": { "type": "array", "items": { "type": "string" } },
+        "defaultQty": { "type": "number" },
+        "isFavorite": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "type", "category", "createdAt"]
+    },
+    "Vendor": {
+      "title": "Vendor",
+      "description": "A hotel or caterer providing food.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "contactPerson": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "notes": { "type": "string" },
+        "currency": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "createdAt"]
+    },
+    "VendorMenuItem": {
+      "title": "VendorMenuItem",
+      "description": "A menu item provided by a specific vendor.",
+      "type": "object",
+      "properties": {
+        "vendorId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "currency": { "type": "string" },
+        "category": { "type": "string" },
+        "dietaryTags": { "type": "array", "items": { "type": "string" } },
+        "allergens": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["vendorId", "name", "price", "createdAt"]
+    },
+    "FlightOrder": {
+      "title": "FlightOrder",
+      "description": "A flight and its associated catering/grocery order.",
+      "type": "object",
+      "properties": {
+        "flightNumber": { "type": "string" },
+        "tailNumber": { "type": "string" },
+        "departure": { "type": "string" },
+        "arrival": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "paxCount": { "type": "number" },
+        "crewCount": { "type": "number" },
+        "dietaryNotes": { "type": "string" },
+        "status": { "type": "string", "enum": ["Draft", "Submitted", "Approved", "Rejected", "Completed"] },
+        "vendorId": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "itemId": { "type": "string" },
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "quantity": { "type": "number" },
+              "notes": { "type": "string" },
+              "price": { "type": "number" }
+            },
+            "required": ["name", "quantity"]
+          }
+        },
+        "createdBy": { "type": "string" },
+        "approvedBy": { "type": "string" },
+        "rejectionReason": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["departure", "arrival", "date", "status", "createdBy", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and roles."
+    },
+    "/catalogItems/{itemId}": {
+      "schema": "CatalogItem",
+      "description": "Master catalog items."
+    },
+    "/vendors/{vendorId}": {
+      "schema": "Vendor",
+      "description": "Vendors (hotels/caterers)."
+    },
+    "/vendorMenuItems/{itemId}": {
+      "schema": "VendorMenuItem",
+      "description": "Menu items belonging to vendors."
+    },
+    "/flightOrders/{orderId}": {
+      "schema": "FlightOrder",
+      "description": "Flight details and associated orders."
+    }
+  }
+}

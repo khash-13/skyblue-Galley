@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        getUserData().role == 'admin' || 
+        (request.auth.token.email == "khader.sharif@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function isApprover() {
+      return isAuthenticated() && (getUserData().role == 'approver' || isAdmin());
+    }
+
+    function isCrew() {
+      return isAuthenticated() && (getUserData().role == 'crew' || isApprover());
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) || isAdmin();
+      allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
+    match /catalogItems/{itemId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /vendors/{vendorId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /vendorMenuItems/{itemId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /flightOrders/{orderId} {
+      allow read: if isAuthenticated();
+      
+      // Crew can create drafts
+      allow create: if isCrew() && request.resource.data.status == 'Draft' && request.resource.data.createdBy == request.auth.uid;
+      
+      // Crew can update if Draft or Rejected. Approvers can update to Approved/Rejected. Admins can do anything.
+      allow update: if isAdmin() || 
+        (isCrew() && (resource.data.status == 'Draft' || resource.data.status == 'Rejected') && request.resource.data.createdBy == resource.data.createdBy) ||
+        (isApprover() && (request.resource.data.status == 'Approved' || request.resource.data.status == 'Rejected'));
+        
+      allow delete: if isAdmin() || (isCrew() && resource.data.status == 'Draft' && resource.data.createdBy == request.auth.uid);
+    }
+  }
+}
