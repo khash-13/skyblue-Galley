@@ -54,7 +54,8 @@ export default function OrderTracking() {
     loadData();
   };
 
-  const statuses = ['Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Confirmed', 'Completed'];
+  const stepperStatuses = ['Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Confirmed', 'Completed'];
+  const allStatuses = [...stepperStatuses, 'Rejected', 'Cancelled'];
 
   return (
     <div className="p-4 sm:p-8 max-w-5xl mx-auto">
@@ -67,7 +68,8 @@ export default function OrderTracking() {
         {loading ? (
           <div className="text-center text-slate-500">Loading...</div>
         ) : flights.map(order => {
-          const currentStatusIndex = statuses.indexOf(order.status);
+          const currentStatusIndex = stepperStatuses.indexOf(order.status);
+          const isOffPath = currentStatusIndex === -1;
           
           return (
             <div key={order.id} className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
@@ -75,7 +77,11 @@ export default function OrderTracking() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-3 mb-1">
                     <h3 className="font-medium text-slate-900 text-sm sm:text-base truncate">Order #{order.id?.slice(0,6)} — {order.departure} → {order.arrival}</h3>
-                    <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-[10px] font-medium">{order.status}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                      order.status === 'Cancelled' || order.status === 'Rejected' 
+                        ? 'bg-red-100 text-red-800' 
+                        : 'bg-green-100 text-green-800'
+                    }`}>{order.status}</span>
                   </div>
                   <p className="text-xs sm:text-sm text-slate-500">
                     {new Date(order.date).toLocaleDateString()} • {order.items.length} items
@@ -87,7 +93,7 @@ export default function OrderTracking() {
                     onChange={(e) => handleStatusChange(order, e.target.value)}
                     className="flex-1 sm:flex-none px-3 py-1.5 text-xs sm:text-sm border border-slate-300 rounded-md bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900"
                   >
-                    {statuses.map(s => (
+                    {allStatuses.map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
@@ -95,7 +101,7 @@ export default function OrderTracking() {
                     <Upload className="w-4 h-4" /> Upload Bill
                   </button>
                   <Link to={`/flights/${order.id}`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs sm:text-sm border border-slate-300 rounded-md hover:bg-slate-50 text-slate-700">
-                    <Eye className="w-4 h-4" /> View
+                    <Eye className="w-4 h-4" /> {order.status === 'Draft' ? 'Edit' : 'View'}
                   </Link>
                 </div>
               </div>
@@ -105,9 +111,9 @@ export default function OrderTracking() {
                 {/* Desktop Horizontal Stepper */}
                 <div className="hidden sm:flex items-center justify-between relative">
                   <div className="absolute left-0 top-1/2 w-full h-0.5 bg-slate-100 -z-10 transform -translate-y-1/2"></div>
-                  {statuses.map((status, idx) => {
-                    const isCompleted = idx <= currentStatusIndex;
-                    const isCurrent = idx === currentStatusIndex;
+                  {stepperStatuses.map((status, idx) => {
+                    const isCompleted = !isOffPath && idx <= currentStatusIndex;
+                    const isCurrent = !isOffPath && idx === currentStatusIndex;
                     return (
                       <div key={status} className="flex flex-col items-center gap-2 bg-white px-2">
                         <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-medium border ${
@@ -125,10 +131,10 @@ export default function OrderTracking() {
 
                 {/* Mobile Vertical Stepper */}
                 <div className="sm:hidden space-y-3">
-                  {statuses.map((status, idx) => {
-                    const isCompleted = idx <= currentStatusIndex;
-                    const isCurrent = idx === currentStatusIndex;
-                    if (idx > currentStatusIndex + 1 && idx < statuses.length - 1) return null; // Show current, next, and last
+                  {stepperStatuses.map((status, idx) => {
+                    const isCompleted = !isOffPath && idx <= currentStatusIndex;
+                    const isCurrent = !isOffPath && idx === currentStatusIndex;
+                    if (idx > currentStatusIndex + 1 && idx < stepperStatuses.length - 1) return null; // Show current, next, and last
                     
                     return (
                       <div key={status} className="flex items-center gap-3">

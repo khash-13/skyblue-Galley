@@ -26,7 +26,7 @@ export interface FlightOrder {
   serviceStyleNotes?: string;
   specialInstructions?: string;
   pickupLocation?: string;
-  status: 'Draft' | 'Submitted' | 'Approved' | 'Sent to Vendor' | 'Confirmed' | 'Completed' | 'Rejected';
+  status: 'Draft' | 'Submitted' | 'Approved' | 'Sent to Vendor' | 'Confirmed' | 'Completed' | 'Rejected' | 'Cancelled';
   vendorId?: string;
   items: OrderItem[];
   createdBy: string;

@@ -38,6 +38,15 @@ export default function Approvals() {
     }
   };
 
+  const handleSendBackAsDraft = async () => {
+    if (rejectingFlight && rejectionReason.trim()) {
+      await saveFlight({ ...rejectingFlight, status: 'Draft', rejectionReason: rejectionReason });
+      setFlights(flights.filter(f => f.id !== rejectingFlight.id));
+      setRejectingFlight(null);
+      setRejectionReason('');
+    }
+  };
+
   if (user?.role === 'crew') {
     return <div className="p-4 sm:p-8 text-red-500">Access Denied. Approvers only.</div>;
   }
@@ -87,7 +96,7 @@ export default function Approvals() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
             <div className="p-4 border-b border-slate-200 flex justify-between items-center">
-              <h2 className="font-medium text-slate-900">Reject Order</h2>
+              <h2 className="font-medium text-slate-900">Reject or Send Back Order</h2>
               <button onClick={() => setRejectingFlight(null)} className="text-slate-400 hover:text-slate-600 p-2">
                 <X className="w-5 h-5" />
               </button>
@@ -95,10 +104,10 @@ export default function Approvals() {
             <div className="p-6 space-y-4">
               <div className="flex items-start gap-3 p-3 bg-red-50 rounded-md text-red-700 text-sm">
                 <AlertCircle className="w-5 h-5 shrink-0" />
-                <p>You are rejecting order for Flight {rejectingFlight.flightNumber}. Please provide a reason.</p>
+                <p>You are rejecting or sending back the order for Flight {rejectingFlight.flightNumber}. Please provide a reason.</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Rejection Reason *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Reason *</label>
                 <textarea 
                   value={rejectionReason} 
                   onChange={e => setRejectionReason(e.target.value)} 
@@ -110,6 +119,13 @@ export default function Approvals() {
             </div>
             <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row justify-end gap-3 bg-slate-50">
               <button onClick={() => setRejectingFlight(null)} className="w-full sm:w-auto px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-md text-sm font-medium">Cancel</button>
+              <button 
+                onClick={handleSendBackAsDraft} 
+                disabled={!rejectionReason.trim()}
+                className="w-full sm:w-auto px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Send back as Draft
+              </button>
               <button 
                 onClick={handleReject} 
                 disabled={!rejectionReason.trim()}

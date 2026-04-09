@@ -177,6 +177,11 @@ export default function FlightOrderBuilder() {
             <h1 className="text-2xl font-bold text-slate-900">{id ? 'Edit Order' : 'New Order'}</h1>
             <p className="text-slate-500 text-sm">Status: <span className="font-semibold">{currentStatus}</span></p>
             <p className="text-xs text-blue-600 mt-1 max-w-md">Items will be automatically assigned to the best vendors upon saving. Orders may be split if items require multiple vendors.</p>
+            {order?.rejectionReason && (currentStatus === 'Draft' || currentStatus === 'Rejected') && (
+              <div className="mt-3 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-100">
+                <span className="font-semibold">Reason for return/rejection:</span> {order.rejectionReason}
+              </div>
+            )}
           </div>
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             {(currentStatus === 'Approved' || currentStatus === 'Submitted') && order && (

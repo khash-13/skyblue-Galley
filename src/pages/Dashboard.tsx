@@ -124,7 +124,7 @@ export default function Dashboard() {
             {loading ? (
               <div className="p-8 text-center text-slate-500">Loading...</div>
             ) : flights.slice(0, 5).map(order => (
-              <div key={order.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-slate-50 gap-4">
+              <Link to={`/flights/${order.id}`} key={order.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-slate-50 gap-4 cursor-pointer transition-colors">
                 <div className="min-w-0">
                   <h3 className="font-medium text-slate-900 text-sm sm:text-base truncate">Order #{order.id?.slice(0,6)} - {order.departure} → {order.arrival}</h3>
                   <p className="text-xs sm:text-sm text-slate-500 truncate">
@@ -132,9 +132,13 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div className="flex justify-start sm:justify-end shrink-0">
-                  <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap">{order.status}</span>
+                  <span className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap ${
+                    order.status === 'Cancelled' || order.status === 'Rejected' 
+                      ? 'bg-red-100 text-red-800' 
+                      : 'bg-slate-100 text-slate-700'
+                  }`}>{order.status}</span>
                 </div>
-              </div>
+              </Link>
             ))}
             {flights.length === 0 && !loading && (
               <div className="p-8 text-center text-slate-500">No recent orders.</div>
